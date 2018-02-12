@@ -27,8 +27,9 @@ API, but I will never add features that intentionally try to work
 around the query limits imposed by Google Scholar. Please don't ask me
 to add such features.
 
-Install
+Install in order to run the http server
 pip install beautifulsoup4
+pip install bottle
 
 Examples
 --------

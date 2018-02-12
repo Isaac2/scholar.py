@@ -1257,51 +1257,102 @@ def exec_search(options):
 
     querier.send_query(query)
     raw_response = json_http_response(querier)
-    #json_result = json.dumps(raw_response)
 
     return raw_response
 
+#Server
 class OptionsClass(object):
     title = "default"
 
-#path = '{"name":1,"id":2}';
-#options = json.loads(path)
-#print (options)
-#print (options['name'])
+def clean_options_server(options):
+    limit_for_response = 20
 
-options = json.encode(path)
-options = OptionsClass()
-options.after = None
-options.author = 'albert einstein'
-options.allw = None
-options.before = None
-options.citation = None
-options.cluster_id = None
-options.count = 2
-options.cookie_file = None
-options.csv = None
-options.csv_header = None
-options.debug = 0
-options.no_patents = False
-options.no_citations = False
-options.none = None
-options.phrase = "quantum theory"
-options.pub = None
-options.some = None
-options.title_only = False
-options.txt = None
-options.txt_globals = None
-options.version = False
+    if options.after.upper() == "NONE":
+        options.after = None
+    if options.author.upper() == "NONE":
+        options.author = None
+    if options.allw.upper() == "NONE":
+        options.allw = None
+    if options.before.upper() == "NONE":
+        options.before = None
+    if options.citation.upper() == "NONE":
+        options.citation = None
+    if options.cluster_id.upper() == "NONE":
+        options.cluster_id = None
+    if options.count > limit_for_response:
+        options.count = 20
+    if options.cookie_file.upper() == "NONE":
+        options.cookie_file = None
+    if options.csv.upper() == "NONE":
+        options.csv = None
+    if options.csv_header.upper() == "NONE":
+        options.csv_header = None
+    #if options.debug == "None":
+    #   options.debug = 0
+    if options.no_patents.upper() == "FALSE":
+        options.no_patents = False
+    if options.no_citations.upper() == "FALSE":
+        options.no_citations = False
+    if options.none.upper() == "NONE":
+        options.none = None
+    if options.phrase.upper() == "NONE":
+        options.phrase = None
+    if options.pub.upper() == "NONE":
+        options.pub = None
+    if options.some.upper() == "NONE":
+        options.some = None
+    if options.title_only.upper() == "FALSE":
+        options.title_only = False
+    if options.txt.upper() == "NONE":
+        options.txt = None
+    if options.txt_globals.upper() == "NONE":
+        options.txt_globals = None
+    if options.version.upper() == "FALSE":
+        options.version = False
 
-print(options.author)
-#return exec_search(path)
+    return options
 
-# @route('/<path>',method = 'GET')
-# def process(path):
-#   something
+@route('/<path>',method = 'GET')
+def process(path):
+    #paramsRaw = '{"author": "albert einstein", "allw": "None", "some": "None", "none": "None", "phrase": "quantum theory", "title_only": "False", "pub": "None", "after": "None", "before": "None", "no_patents": "False", "no_citations": "False", "cluster_id": "None", "count": 2, "txt": "None", "txt_globals": "None", "csv": "None", "csv_header": "None", "citation": "None", "cookie_file": "None", "debug": 0, "version": "False"}'
+    #optionsTemp = json.loads(paramsRaw)
+
+    optionsTemp = json.loads(path)
+
+    options = OptionsClass()
+
+    options.after       = optionsTemp['after']
+    options.author      = optionsTemp['author']
+    options.allw        = optionsTemp['allw']
+    options.before      = optionsTemp['before']
+    options.citation    = optionsTemp['citation']
+    options.cluster_id  = optionsTemp['cluster_id']
+    #Important not more than 20
+    options.count       = optionsTemp['count']
+    options.cookie_file = optionsTemp['cookie_file']
+    options.csv         = optionsTemp['csv']
+    options.csv_header  = optionsTemp['csv_header']
+    options.debug       = optionsTemp['debug']
+    options.no_patents  = optionsTemp['no_patents']
+    options.no_citations= optionsTemp['no_citations']
+    options.none        = optionsTemp['none']
+    options.phrase      = optionsTemp['phrase']
+    options.pub         = optionsTemp['pub']
+    options.some        = optionsTemp['some']
+    options.title_only  = optionsTemp['title_only']
+    options.txt         = optionsTemp['txt']
+    options.txt_globals = optionsTemp['txt_globals']
+    options.version     = optionsTemp['version']
+
+    options = clean_options_server(options)
+
+    response_raw = exec_search(options)
+    #return responseRaw
+    json_result = json.dumps(response_raw)
+    return json_result
 
 
-# run(host='localhost', port=8080, debug=True)
+run(host='localhost', port=8080, debug=True)
 
 if __name__ == "__main__":
    sys.exit(main())
