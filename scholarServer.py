@@ -1261,19 +1261,22 @@ def exec_search(options):
     return raw_response
 
 #Server
+from bottle import Bottle, request, response, run
+app = Bottle()
+
 class OptionsClass(object):
     title = "default"
 
 def clean_options_server(options):
     limit_for_response = 20
 
-    if options.after.upper() == "NONE":
+    if options.after == "NONE":
         options.after = None
     if options.author.upper() == "NONE":
         options.author = None
     if options.allw.upper() == "NONE":
         options.allw = None
-    if options.before.upper() == "NONE":
+    if options.before == "NONE":
         options.before = None
     if options.citation.upper() == "NONE":
         options.citation = None
@@ -1289,9 +1292,9 @@ def clean_options_server(options):
         options.csv_header = None
     #if options.debug == "None":
     #   options.debug = 0
-    if options.no_patents.upper() == "FALSE":
+    if options.no_patents == "FALSE":
         options.no_patents = False
-    if options.no_citations.upper() == "FALSE":
+    if options.no_citations == "FALSE":
         options.no_citations = False
     if options.none.upper() == "NONE":
         options.none = None
@@ -1301,7 +1304,7 @@ def clean_options_server(options):
         options.pub = None
     if options.some.upper() == "NONE":
         options.some = None
-    if options.title_only.upper() == "FALSE":
+    if options.title_only == "FALSE":
         options.title_only = False
     if options.txt.upper() == "NONE":
         options.txt = None
@@ -1312,7 +1315,18 @@ def clean_options_server(options):
 
     return options
 
-@route('/<path>',method = 'GET')
+@app.hook('after_request')
+def enable_cors():
+    """
+    You need to add some headers to each request.
+    Don't use the wildcard '*' for Access-Control-Allow-Origin in production.
+    """
+    print(response)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+
+@app.route('/<path>',method = 'GET')
 def process(path):
     #paramsRaw = '{"author": "albert einstein", "allw": "None", "some": "None", "none": "None", "phrase": "quantum theory", "title_only": "False", "pub": "None", "after": "None", "before": "None", "no_patents": "False", "no_citations": "False", "cluster_id": "None", "count": 2, "txt": "None", "txt_globals": "None", "csv": "None", "csv_header": "None", "citation": "None", "cookie_file": "None", "debug": 0, "version": "False"}'
     #optionsTemp = json.loads(paramsRaw)
@@ -1327,7 +1341,6 @@ def process(path):
     options.before      = optionsTemp['before']
     options.citation    = optionsTemp['citation']
     options.cluster_id  = optionsTemp['cluster_id']
-    #Important not more than 20
     options.count       = optionsTemp['count']
     options.cookie_file = optionsTemp['cookie_file']
     options.csv         = optionsTemp['csv']
@@ -1352,7 +1365,7 @@ def process(path):
     return json_result
 
 
-run(host='localhost', port=8080, debug=True)
+run(app,host='localhost', port=5000, debug=True)
 
 if __name__ == "__main__":
    sys.exit(main())
