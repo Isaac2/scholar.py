@@ -166,6 +166,7 @@ import os
 import re
 import sys
 import warnings
+import json
 
 try:
     # Try importing for Python 3
@@ -188,6 +189,7 @@ except ImportError:
         from BeautifulSoup import BeautifulSoup
     except ImportError:
         print('We need BeautifulSoup, sorry...')
+        print('You can install BeautifulSoup in terminal with\n pip install beautifulsoup4')
         sys.exit(1)
 
 # Support unicode in both Python 2 and 3. In Python 3, unicode is str.
@@ -335,6 +337,27 @@ class ScholarArticle(object):
             if item[0] is not None:
                 res.append(fmt % (item[1], item[0]))
         return '\n'.join(res)
+
+    def as_json(self):
+        # Get items sorted in specified order:
+        items = sorted(list(self.attrs.values()), key=lambda item: item[2])
+
+        raw_data = {}        
+
+        for item in items:
+            if item[0] is not None:
+                #print(item[1]) Key
+                #print(item[0]) Value                            
+                #print("------")
+                key_name = item[1]
+                key_value = item[0]
+
+                raw_data[key_name] = key_value
+
+        # Json.dumps transforms the data to an object but
+        # It could be an array so is parsed by consumer and not now
+        # json_result = json.dumps(raw_data)
+        return raw_data
 
     def as_csv(self, header=False, sep='|'):
         # Get keys sorted in specified order:
@@ -1132,6 +1155,15 @@ def txt(querier, with_globals):
     for art in articles:
         print(encode(art.as_txt()) + '\n')
 
+def json_http_response(querier):
+    response = []
+    articles = querier.articles
+    for art in articles:
+        response.append(art.as_json())
+
+    print(response)
+    return response
+
 def csv(querier, header=False, sep='|'):
     articles = querier.articles
     for art in articles:
@@ -1299,7 +1331,9 @@ scholar.py -c 5 -a "albert einstein" -t --none "quantum theory" --after 1970"""
     elif options.citation is not None:
         citation_export(querier)
     else:
-        txt(querier, with_globals=options.txt_globals)
+        #txt(querier, with_globals=options.txt_globals)        
+        raw_response = json_http_response(querier)
+        json_result = json.dumps(raw_response)
 
     if options.cookie_file:
         querier.save_cookies()
